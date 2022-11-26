@@ -1,0 +1,1 @@
+web: gunicorn MessaginApi.wsgi --log-file -

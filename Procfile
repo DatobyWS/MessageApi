@@ -1,1 +1,1 @@
-web: gunicorn messaginApi.wsgi.application
+web: gunicorn MessaginApi.wsgi.py

@@ -1,1 +1,1 @@
-web: gunicorn MessaginApi.wsgi --log-file
+web: gunicorn --env DJANGO_SETTINGS_MODULE=MessaginApi.settings MessaginApi.wsgi

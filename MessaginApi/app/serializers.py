@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Message,MessageUser
-from rest_framework.authtoken.models import Token
+from .models import Message
 
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:

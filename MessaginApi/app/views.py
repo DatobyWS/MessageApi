@@ -1,6 +1,5 @@
 from django.http import JsonResponse
-from .models import MessageUser,Message
-from django.contrib.auth import authenticate
+from .models import Message
 from .serializers import MessageSerializer
 from rest_framework import status,generics
 from rest_framework.authtoken.models import Token
@@ -8,6 +7,8 @@ from rest_framework.request import Request
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.db.models import Q
+from django.contrib.auth.models import User
+
 
 class MessageAll(generics.GenericAPIView):
     serializer_class = MessageSerializer
@@ -16,7 +17,7 @@ class MessageAll(generics.GenericAPIView):
 
     def get(self,request:Request):
         usertoken=Token.objects.get(key=request.auth)
-        massage_user=MessageUser.objects.get(id=request.user.id)
+        massage_user=User.objects.get(id=request.user.id)
         if usertoken.user_id == massage_user.id:
             messages=Message.objects.filter(Q(sender_id=usertoken.user_id) | Q(receiver=usertoken.user_id))
             if messages:
@@ -28,14 +29,11 @@ class MessageAll(generics.GenericAPIView):
             return JsonResponse({'status':'Faild to Logged in'},status=status.HTTP_404_NOT_FOUND)
     
     def post(self,request:Request):
-        user_name=request.data['username']
-        password=request.data['password']
         senderid=request.data['sender']
         serializer= MessageSerializer(data=request.data)
-        user=authenticate(username=user_name,password=password)
-        if user is not None:
+        massage_user=User.objects.get(id=request.user.id)
+        if massage_user is not None:
             usertoken=Token.objects.get(key=request.auth)
-            massage_user=MessageUser.objects.get(id=user.id)
             if usertoken.user_id == massage_user.id and usertoken.user_id == senderid :
                 if serializer.is_valid():
                     serializer.save()
@@ -43,7 +41,7 @@ class MessageAll(generics.GenericAPIView):
             else:
                 return JsonResponse({'status':'Not Found!'},status=status.HTTP_404_NOT_FOUND)
             
-        if user is None:
+        if massage_user is None:
             return JsonResponse({'status':'Your User name or Password are worng! Please Try Again!'},status=status.HTTP_404_NOT_FOUND)
     
 class MessageOne(generics.GenericAPIView):
@@ -53,7 +51,7 @@ class MessageOne(generics.GenericAPIView):
 
     def put(self,request:Request,pk):
         usertoken=Token.objects.get(key=request.auth)
-        massage_user=MessageUser.objects.get(id=request.user.id)
+        massage_user=User.objects.get(id=request.user.id)
         if usertoken.user_id == massage_user.id:
             message=Message.objects.filter(Q(id=pk) & Q(receiver=usertoken.user_id)).update(read=True)
             if message:
@@ -72,7 +70,7 @@ class MessageOne(generics.GenericAPIView):
 
     def delete(self,request:Request,pk):
         usertoken=Token.objects.get(key=request.auth)
-        massage_user=MessageUser.objects.get(id=request.user.id)
+        massage_user=User.objects.get(id=request.user.id)
         if usertoken.user_id == massage_user.id:
             message=Message.objects.filter(Q(id=pk) & Q(sender_id=usertoken.user_id) | Q(id=pk) & Q(receiver=usertoken.user_id))
             if message:
@@ -90,7 +88,7 @@ class MessageNotRead(generics.GenericAPIView):
 
     def get(self,request:Request):
         usertoken=Token.objects.get(key=request.auth)
-        massage_user=MessageUser.objects.get(id=request.user.id)
+        massage_user=User.objects.get(id=request.user.id)
         if usertoken.user_id == massage_user.id:
             message=Message.objects.filter(Q(receiver=usertoken.user_id) & Q(read=False))
             if message:

@@ -11,4 +11,4 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=datetime.now)
 
-    def __str__(self):return str(self.sender.id) + " to id user: " + str(self.receiver) + " the subject is: " + self.subject +" message id is: " + str(self.id)
+    def __str__(self):return f'{str(self.sender.id)} to id user:{str(self.receiver)} the subject is:{self.subject} message id is:{str(self.id)}'
